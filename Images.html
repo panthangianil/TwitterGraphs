@@ -1,0 +1,210 @@
+
+<!DOCTYPE html >
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<head>
+    <title>Twitter</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/css/bootstrap-select.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.0/css/ion.rangeSlider.min.css"/>
+
+  <style>
+  body {
+		font-family: Sans-serif;
+		background: url(https://cdn.inspirationhut.net/wp-content/uploads/2014/09/paper-texture-1.jpg);
+		color: #1d3b4a;   
+		padding: 0 10px;
+		display:block;
+		height:100%;
+		overflow: hidden;
+	}
+
+	[class*="col-"]{
+		padding: 0px;
+		margin: 5px auto;
+	}
+
+	[class*="col-"] .row{
+		margin-right: 0px;
+		margin-left: 0px;
+	}
+	.box,.mapPage,.box-right{
+		background: #fff;
+	}
+	.box-slider{
+		background: rgb(0,0,0,0.6);
+		border-radius: 35px !important;
+	}
+	.box,.mapPage,.box-right{
+		margin: 6px;
+		padding: 5px 0;
+		border: 1px solid #d4d4d4;
+		border-top-color: rgb(204, 204, 204);
+		border-top-style: solid;
+		border-top-width: 1px;
+		border-right-width: 1px;
+		border-bottom-width: 1px;
+		border-left-width: 1px;
+		border-radius: 0 0 4px 4px;
+		border-top-left-radius: 0px;
+		border-top-right-radius: 0px;
+		border-width: 0 0 3px;
+		border-top-width: 0px;
+		display:block;
+		height:100%;
+		overflow: hidden;
+		animation-duration: 1s;
+		animation-name: fadeAndScale;
+		animation-timing-function: cubic-bezier(.71,.55,.62,1.57);
+	}
+	.row-margin {
+		margin-top: -8px;
+	}
+	.title {
+		font-size: 15px;
+		color: rgba(0,0,0,0.6);
+		text-align: left;
+		padding-left: 15px;
+		font-weight:bold;
+		margin-top:10px;
+		padding-left: 10px !important;
+	}
+	.page-title {
+		font-size: 18px;
+		margin: 0 -10px;
+		color: rgba(0,0,0,0.6);
+		text-align: left;
+	}
+	.box .title {
+		padding-left: 0px;
+	}
+	/* Ripple effect */
+	.ripple {
+		background-position: center;
+		transition: background 0.8s;
+	}
+	.ripple:active {
+		background: rgba(0,0,0,0.1) radial-gradient(circle, transparent 1%, rgba(0,0,0,0.1) 1%);
+		background-size: 100%;
+		transition: background 0s;
+	}
+
+	/* Animation effect */
+	@keyframes fadeAndScale {
+		from {
+			opacity: 0;
+			transform: scale(.9, .9);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1, 1);
+		}
+	}
+  </style>
+</head>
+<body>
+	<div class="container-fluid"> 
+			<div class='row mainPage'>
+				<div class="col-md-12">
+					<div class="row">                
+						<div class="col-md-12">
+							<div class="box">
+								<div class="row">                            
+									<div class="col">
+										<p class="title">Safety Chart (Door Status Vs Speed)</p>
+									</div>
+									<div class="col-auto">
+										<label><select id="companiesFilter" class="form-control"></select></label>
+									</div>
+									<div class="col-auto">
+										<label><select id="statusFilter" class="form-control"></select></label>
+									</div>
+								</div>
+								<svg id="safety"></svg>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+        </div>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <!-- <script type="text/javascript" src="https://unpkg.com/d3-radial-axis@1.5/dist/d3-radial-axis.min.js"></script> -->
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.0/js/ion.rangeSlider.min.js"></script> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.10/js/bootstrap-select.min.js"></script> -->
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBdTuWJjEUMvQZ6VVPGksE12XNgQgs__Qk&sensor=true&libraries=visualization&.js"></script> -->
+	<!-- <script src="https://maps.google.com/maps/api/js?libraries=placeses,visualization,drawing,geometry,places&key=AIzaSyC1jQ4R1oS9lNhilFmoFstObNRLLWCXTHY"></script> -->
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script> -->
+	<!-- <script src="https://cdn.rawgit.com/googlemaps/v3-utility-library/master/infobox/src/infobox.js"></script> -->
+	
+	<script type="text/javascript">
+	   $(document).ready(function () {
+			function setHeight() {
+				windowHeight = $(window).innerHeight()-30;
+				windowWidth = $(window).innerWidth();
+				if(windowWidth<700){
+					$('body').css('overflow','auto');
+				}else{
+					$('body').css('overflow','hidden');
+				}
+				$('#autoHeight').css('height', windowHeight - '10');
+				var boxHeight = 88 * (windowHeight) / 100;
+				$('.box').css('height', boxHeight);
+			  };
+			setHeight();
+			$(window).resize(function () {
+				noOfLoads=2;
+				setHeight();
+				noOfLoads=1;
+			});
+		});
+	</script>
+	<script>
+	d3.select("#companiesFilter")
+            .selectAll("option")
+            .data([0,1,2])
+            .enter()
+            .append("option")
+            .text(function (option) {
+                return option;
+            });
+	d3.select("#statusFilter")
+            .selectAll("option")
+            .data([4,5,6])
+            .enter()
+            .append("option")
+            .text(function (option) {
+                return option;
+            });
+	d3.select("#companiesFilter").on('change',function(){
+		var value=d3.select('#companiesFilter').node().value;
+		if(value==1){
+			images('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png');
+		}else if(value==2){
+			images('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmtHs8rsZoCvF1pnzizOVStLArSd60z_DlTyG7ZgNaBa8scVN9Dg');
+		}
+	});
+	function images(url){
+		d3.selectAll('#safety').html('');
+	var width = $('#safety').parent().width(),
+		height= $('#safety').parent().height()-$('.title').parent().height();
+			var vis = d3.select("#safety").attr('width',width)
+						.attr('height',height);
+				vis.append("g")
+					.attr("transform", "translate(" + width/2 + "," + height/2 + ")")
+
+	 vis.append("svg:image")
+    //.attr("xlink:href", 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+    .attr("xlink:href", url)
+    .attr("width", width)
+    .attr("height", height)
+    .attr("x", 0)
+    .attr("y", 0);
+	}
+	images('https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png')
+	</script>
+	
+</body>
+</html>
